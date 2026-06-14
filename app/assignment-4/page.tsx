@@ -2,6 +2,16 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import {
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Legend,
+} from "recharts";
 
 type Tab = {
   id: string;
@@ -17,6 +27,15 @@ const tabs: Tab[] = [
   { id: "part4", label: "Part 4: Marketing Automation", icon: "🤖" },
   { id: "part5", label: "Part 5: Decision Challenge", icon: "⚖️" },
   { id: "conclusion", label: "Conclusion", icon: "🎯" },
+];
+
+const growthData = [
+  { month: "Month 1", spicyVolcano: 350, creamyBlast: 200 },
+  { month: "Month 2", spicyVolcano: 520, creamyBlast: 230 },
+  { month: "Month 3", spicyVolcano: 880, creamyBlast: 250 },
+  { month: "Month 4", spicyVolcano: 1500, creamyBlast: 260 },
+  { month: "Month 5", spicyVolcano: 2800, creamyBlast: 280 },
+  { month: "Month 6", spicyVolcano: 4500, creamyBlast: 290 },
 ];
 
 export default function Assignment4() {
@@ -161,6 +180,46 @@ export default function Assignment4() {
                 <p className="text-lg text-charcoal/80">
                   Translating marketing assumptions into financial projections that guide inventory, staffing, and expansion decisions.
                 </p>
+
+                <div className="mt-10 bg-charcoal/5 rounded-3xl p-6 border border-charcoal/10">
+                  <div className="mb-6 flex items-center justify-between">
+                    <h3 className="font-display text-2xl font-bold text-charcoal my-0">
+                      Product Growth Trajectory
+                    </h3>
+                    <span className="text-xs font-bold uppercase tracking-widest text-chili bg-white px-3 py-1 rounded-full shadow-sm">
+                      Viral Stunt Impact
+                    </span>
+                  </div>
+                  <p className="text-sm text-charcoal/70 mb-6">
+                    Notice the explosive exponential growth of the <strong>Spicy Volcano</strong> compared to the stable <strong>Creamy Blast</strong>. This represents the projected impact of the "Wall of Flame" marketing stunt scaling through viral social media sharing across campuses.
+                  </p>
+                  
+                  <div className="h-[400px] w-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <AreaChart data={growthData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                        <defs>
+                          <linearGradient id="colorSpicy" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="#e11d2a" stopOpacity={0.8}/>
+                            <stop offset="95%" stopColor="#e11d2a" stopOpacity={0}/>
+                          </linearGradient>
+                          <linearGradient id="colorCreamy" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="#ffc12e" stopOpacity={0.8}/>
+                            <stop offset="95%" stopColor="#ffc12e" stopOpacity={0}/>
+                          </linearGradient>
+                        </defs>
+                        <XAxis dataKey="month" stroke="#201611" opacity={0.5} tick={{ fontSize: 12 }} />
+                        <YAxis stroke="#201611" opacity={0.5} tick={{ fontSize: 12 }} />
+                        <CartesianGrid strokeDasharray="3 3" opacity={0.1} />
+                        <Tooltip 
+                          contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1)' }}
+                        />
+                        <Legend wrapperStyle={{ paddingTop: '20px' }} />
+                        <Area type="monotone" dataKey="spicyVolcano" name="Spicy Volcano Sales" stroke="#e11d2a" strokeWidth={3} fillOpacity={1} fill="url(#colorSpicy)" />
+                        <Area type="monotone" dataKey="creamyBlast" name="Creamy Blast Sales" stroke="#ffc12e" strokeWidth={3} fillOpacity={1} fill="url(#colorCreamy)" />
+                      </AreaChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
 
                 <div className="mt-8 overflow-hidden rounded-3xl border border-charcoal/10 shadow-sm">
                   <div className="bg-charcoal px-6 py-4">

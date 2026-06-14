@@ -2,6 +2,7 @@ import Link from "next/link";
 import { products } from "./lib/products";
 import { ProductCard } from "./components/product-card";
 import { SeasonalRecommendation } from "./components/seasonal-recommendation";
+import { WallOfFlame } from "./components/wall-of-flame";
 
 const features = [
   {
@@ -238,9 +239,9 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Testimonials */}
-      <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
-        <div className="text-center">
+      {/* Testimonials Marquee */}
+      <section className="py-16 overflow-hidden bg-charcoal/5">
+        <div className="text-center mb-10">
           <span className="text-sm font-bold uppercase tracking-[0.2em] text-ember">
             The regulars
           </span>
@@ -248,29 +249,69 @@ export default function Home() {
             Loved across Lahore
           </h2>
         </div>
-        <div className="mt-10 grid gap-6 md:grid-cols-3">
-          {reviews.map((r) => (
-            <figure
-              key={r.name}
-              className="flex flex-col rounded-3xl border border-charcoal/10 bg-white p-6 shadow-sm"
-            >
-              <div className="mb-3 text-mango">★★★★★</div>
-              <blockquote className="flex-1 text-sm leading-relaxed text-charcoal/70">
-                “{r.quote}”
-              </blockquote>
-              <figcaption className="mt-5 flex items-center gap-3">
-                <span className="grid h-11 w-11 place-items-center rounded-full bg-cream text-xl">
-                  {r.emoji}
-                </span>
-                <div>
-                  <div className="font-display text-sm font-bold text-charcoal">
-                    {r.name}
+        <div className="relative flex overflow-x-hidden group">
+          <div className="absolute inset-y-0 left-0 w-32 bg-gradient-to-r from-[--color-cream] to-transparent z-10" />
+          <div className="absolute inset-y-0 right-0 w-32 bg-gradient-to-l from-[--color-cream] to-transparent z-10" />
+          
+          <div className="py-4 animate-marquee whitespace-nowrap flex gap-6 group-hover:[animation-play-state:paused]">
+            {[...reviews, ...reviews, ...reviews, ...reviews].map((r, i) => (
+              <figure
+                key={i}
+                className="flex w-80 md:w-96 flex-col rounded-3xl border border-charcoal/10 bg-white p-6 shadow-sm transition-transform hover:-translate-y-1 whitespace-normal flex-shrink-0"
+              >
+                <div className="mb-3 text-mango text-lg">★★★★★</div>
+                <blockquote className="flex-1 text-sm leading-relaxed text-charcoal/80 font-medium">
+                  "{r.quote}"
+                </blockquote>
+                <figcaption className="mt-6 flex items-center gap-3">
+                  <span className="grid h-12 w-12 place-items-center rounded-full bg-cream text-2xl shadow-inner">
+                    {r.emoji}
+                  </span>
+                  <div>
+                    <div className="font-display text-sm font-bold text-charcoal">
+                      {r.name}
+                    </div>
+                    <div className="text-xs text-charcoal/50 font-semibold">{r.tag}</div>
                   </div>
-                  <div className="text-xs text-charcoal/50">{r.tag}</div>
-                </div>
-              </figcaption>
-            </figure>
-          ))}
+                </figcaption>
+              </figure>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Marketing Stunt: Wall of Flame */}
+      <section className="mx-auto max-w-6xl px-4 py-20 sm:px-6">
+        <div className="grid lg:grid-cols-2 gap-12 items-center">
+          <div>
+            <span className="text-sm font-bold uppercase tracking-[0.2em] text-chili">
+              Marketing Stunt
+            </span>
+            <h2 className="mt-3 font-display text-4xl font-extrabold sm:text-5xl text-charcoal leading-tight">
+              The Spicy Volcano Challenge 🌋
+            </h2>
+            <p className="mt-5 text-lg text-charcoal/70 leading-relaxed">
+              We asked Lahore to handle our heat. Only a select few survived without reaching for the Doodh Soda. 
+              Are you brave enough to get your name on the board?
+            </p>
+            <ul className="mt-8 space-y-4">
+              <li className="flex items-center gap-3 font-medium text-charcoal/80">
+                <span className="grid h-8 w-8 place-items-center rounded-full bg-chili text-white font-bold text-sm shadow-md">1</span>
+                Order the Spicy Volcano (Heat Level 5/5)
+              </li>
+              <li className="flex items-center gap-3 font-medium text-charcoal/80">
+                <span className="grid h-8 w-8 place-items-center rounded-full bg-chili text-white font-bold text-sm shadow-md">2</span>
+                Finish it under 5 minutes
+              </li>
+              <li className="flex items-center gap-3 font-medium text-charcoal/80">
+                <span className="grid h-8 w-8 place-items-center rounded-full bg-chili text-white font-bold text-sm shadow-md">3</span>
+                No drinks allowed during the challenge
+              </li>
+            </ul>
+          </div>
+          <div className="transform transition-all duration-500 hover:scale-[1.02]">
+            <WallOfFlame />
+          </div>
         </div>
       </section>
 
