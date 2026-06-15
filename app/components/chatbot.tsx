@@ -44,17 +44,24 @@ export function Chatbot() {
         body: JSON.stringify({ messages: [...messages, userMsg] }),
       });
 
-      if (!response.ok) throw new Error("Failed to fetch");
+      if (!response.ok) {
+        let errDetails = "Failed to fetch";
+        try {
+          const errData = await response.json();
+          errDetails = errData.details || errData.error || response.statusText;
+        } catch (_) {}
+        throw new Error(errDetails);
+      }
       const data = await response.json();
 
       setMessages((prev) => [
         ...prev,
         { id: (Date.now() + 1).toString(), role: "assistant", content: data.message },
       ]);
-    } catch (error) {
+    } catch (error: any) {
       setMessages((prev) => [
         ...prev,
-        { id: (Date.now() + 1).toString(), role: "assistant", content: "Oops, something went wrong on our end! 😅" },
+        { id: (Date.now() + 1).toString(), role: "assistant", content: `Error: ${error.message}` },
       ]);
     } finally {
       setIsLoading(false);
