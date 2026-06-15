@@ -74,7 +74,6 @@ ${products.map(p => `- ${p.name}: ${p.description} (Price: PKR ${p.price}, Heat 
       history: geminiHistory,
       generationConfig: {
         temperature: 0.7,
-        maxOutputTokens: 250,
       },
     });
 
