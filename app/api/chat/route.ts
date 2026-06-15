@@ -1,44 +1,15 @@
 import { NextResponse } from "next/server";
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import Groq from "groq-sdk";
 import { products } from "../../lib/products";
 
 export async function POST(req: Request) {
   try {
-    if (!process.env.GEMINI_API_KEY) {
-      throw new Error("Missing GEMINI_API_KEY");
+    if (!process.env.GROQ_API_KEY) {
+      throw new Error("Missing GROQ_API_KEY");
     }
 
-    // Initialize Gemini SDK with the key from environment variables
-    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-
+    const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
     const { messages } = await req.json();
-
-    // Map the incoming messages (role: "user" | "assistant") to Gemini's format (role: "user" | "model")
-    const mappedHistory = messages.slice(0, -1).map((m: any) => ({
-      role: m.role === "assistant" ? "model" : "user",
-      parts: [{ text: m.content }],
-    }));
-    
-    // Gemini strictly requires the history array to start with a 'user' message,
-    // and MUST strictly alternate between 'user' and 'model'.
-    const geminiHistory: any[] = [];
-    
-    // Start from the end to ensure we keep the most recent context
-    let expectedRole = "model";
-    for (let i = mappedHistory.length - 1; i >= 0; i--) {
-      if (mappedHistory[i].role === expectedRole) {
-        geminiHistory.unshift(mappedHistory[i]);
-        expectedRole = expectedRole === "model" ? "user" : "model";
-      }
-    }
-
-    // Since we need to start with 'user', if the first message in our alternating array is 'model', we drop it.
-    if (geminiHistory.length > 0 && geminiHistory[0].role === "model") {
-      geminiHistory.shift();
-    }
-
-    // The latest message from the user
-    const latestMessage = messages[messages.length - 1].content;
 
     const systemInstruction = `
 You are the official AI chatbot for a Lahore-based food truck brand called "Chatak Patak — Flavor Ka Dhamaka!".
@@ -63,22 +34,22 @@ ${products.map(p => `- ${p.name}: ${p.description} (Price: PKR ${p.price}, Heat 
 - If asked about business details, proudly share the Chatak Patak story and value prop based on the training data.
 `;
 
-    // Use gemini-2.0-flash to bypass the strict free-tier quota limits currently hit on the latest models
-    const model = genAI.getGenerativeModel({
-      model: "gemini-2.0-flash",
-      systemInstruction,
+    // Map messages to Groq's format (OpenAI compatible)
+    const formattedMessages = [
+      { role: "system", content: systemInstruction },
+      ...messages.map((m: any) => ({
+        role: m.role,
+        content: m.content
+      }))
+    ];
+
+    const chatCompletion = await groq.chat.completions.create({
+      messages: formattedMessages,
+      model: "llama-3.3-70b-versatile",
+      temperature: 0.7,
     });
 
-    // Start a chat session with history
-    const chatSession = model.startChat({
-      history: geminiHistory,
-      generationConfig: {
-        temperature: 0.7,
-      },
-    });
-
-    const result = await chatSession.sendMessage(latestMessage);
-    const responseContent = result.response.text() || "Sorry, I'm taking a quick break to restock! Try again later.";
+    const responseContent = chatCompletion.choices[0]?.message?.content || "Sorry, I'm taking a quick break to restock! Try again later.";
 
     return NextResponse.json({ message: responseContent });
   } catch (error: any) {
