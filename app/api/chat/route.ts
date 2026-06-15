@@ -2,14 +2,14 @@ import { NextResponse } from "next/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { products } from "../../lib/products";
 
-// Initialize Gemini SDK with the key from environment variables
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
-
 export async function POST(req: Request) {
   try {
     if (!process.env.GEMINI_API_KEY) {
       throw new Error("Missing GEMINI_API_KEY");
     }
+
+    // Initialize Gemini SDK with the key from environment variables
+    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
     const { messages } = await req.json();
 
@@ -22,19 +22,19 @@ export async function POST(req: Request) {
     // Gemini strictly requires the history array to start with a 'user' message,
     // and MUST strictly alternate between 'user' and 'model'.
     const geminiHistory: any[] = [];
-    let expectedRole = "user";
-
-    for (const msg of mappedHistory) {
-      if (msg.role === expectedRole) {
-        geminiHistory.push(msg);
-        expectedRole = expectedRole === "user" ? "model" : "user";
+    
+    // Start from the end to ensure we keep the most recent context
+    let expectedRole = "model";
+    for (let i = mappedHistory.length - 1; i >= 0; i--) {
+      if (mappedHistory[i].role === expectedRole) {
+        geminiHistory.unshift(mappedHistory[i]);
+        expectedRole = expectedRole === "model" ? "user" : "model";
       }
     }
 
-    // Since we are about to send a new 'user' message (latestMessage) to the chat session,
-    // the history MUST end with a 'model' message. If it ends with 'user', we drop it.
-    if (geminiHistory.length > 0 && geminiHistory[geminiHistory.length - 1].role === "user") {
-      geminiHistory.pop();
+    // Since we need to start with 'user', if the first message in our alternating array is 'model', we drop it.
+    if (geminiHistory.length > 0 && geminiHistory[0].role === "model") {
+      geminiHistory.shift();
     }
 
     // The latest message from the user
@@ -82,10 +82,10 @@ ${products.map(p => `- ${p.name}: ${p.description} (Price: PKR ${p.price}, Heat 
     const responseContent = result.response.text() || "Sorry, I'm taking a quick break to restock! Try again later.";
 
     return NextResponse.json({ message: responseContent });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error in chat route:", error);
     return NextResponse.json(
-      { error: "Failed to generate response" },
+      { error: "Failed to generate response", details: error.message },
       { status: 500 }
     );
   }
