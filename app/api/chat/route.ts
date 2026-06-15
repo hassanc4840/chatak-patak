@@ -63,9 +63,9 @@ ${products.map(p => `- ${p.name}: ${p.description} (Price: PKR ${p.price}, Heat 
 - If asked about business details, proudly share the Chatak Patak story and value prop based on the training data.
 `;
 
-    // Use gemini-2.5-flash as it is extremely fast and capable
+    // Use gemini-1.5-flash as it is more stable and less prone to 503 errors
     const model = genAI.getGenerativeModel({
-      model: "gemini-2.5-flash",
+      model: "gemini-1.5-flash",
       systemInstruction,
     });
 
